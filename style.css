@@ -1,0 +1,140 @@
+body {
+    margin: 0;
+    padding: 30px 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: #fafafa;
+}
+
+
+.menu {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+
+    max-width: 900px;
+    margin: 0 auto 30px;
+
+    padding: 10px 0;
+    border-bottom: 1px solid #ccc;
+}
+
+.menu a {
+    color: #333;
+    text-decoration: none;
+    padding: 6px 10px;
+}
+
+.menu a:hover {
+    color: #1a6fb5;
+    text-decoration: underline;
+}
+
+
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin: 0 0 20px;
+}
+
+h2 {
+    color: #333;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+    margin-top: 30px;
+}
+
+
+
+img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 15px auto;
+}
+
+
+
+ul {
+    max-width: 900px;
+    margin: 15px auto;
+    padding-left: 20px;
+}
+
+ul li a {
+    color: #1a6fb5;
+    text-decoration: none;
+}
+
+ul li a:hover {
+    text-decoration: underline;
+}
+
+
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 900px;
+    margin: 15px auto;
+}
+
+th,
+td {
+    padding: 8px 12px;
+    border: 1px solid #999;
+    text-align: left;
+}
+
+th {
+    background: #eee;
+}
+
+
+
+p {
+    max-width: 900px;
+    margin: 12px auto;
+}
+
+
+
+.reg-form {
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+.reg-form label {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.reg-form input[type="text"],
+.reg-form input[type="email"],
+.reg-form input[type="password"],
+.reg-form input[type="file"] {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #999;
+    font-size: 1rem;
+}
+
+.reg-form input[type="radio"],
+.reg-form input[type="checkbox"] {
+    width: auto;
+    margin-right: 6px;
+}
+
+.reg-form input[type="submit"] {
+    padding: 8px 16px;
+    border: 1px solid #999;
+    background: #eee;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.reg-form input[type="submit"]:hover {
+    background: #ddd;
+}
