@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <nav class="menu">
+        <a href="index.html"> На главную </a>
+        <a href="form.html">Регистрация</a>
+    </nav>
+
+    <h1>Регистрация</h1>
+
+    <form>
+
+        <p>
+            <label class="label">
+                Имя:
+                <input class="input" type="text" name="name">
+            </label>
+        </p>
+
+        <p>
+            <label class="label">
+                Email:
+                <input class="input" type="email" name="email">
+            </label>
+        </p>
+
+        <p>
+            <label class="label">
+                Пароль:
+                <input class="input" type="password" name="password">
+            </label>
+        </p>
+
+        <p>
+            <label class="label">
+                Изображение:
+                <input class="input" type="file" name="image">
+            </label>
+        </p>
+
+        <p>Пол:</p>
+
+        <p>
+            <label class="label">
+                <input class="input" type="radio"
+                       name="gender" value="male">
+                Мужской
+            </label>
+        </p>
+
+        <p>
+            <label class="label">
+                <input class="input" type="radio"
+                       name="gender" value="female">
+                Женский
+            </label>
+        </p>
+
+        <p>
+            <label class="label">
+                <input class="input" type="checkbox"
+                       name="mailing">
+                Согласен на получение рассылки
+            </label>
+        </p>
+
+        <p>
+            <input class="input" type="submit"
+                   value="Зарегистрироваться">
+        </p>
+
+    </form>
+
+    <p>
+        <a href="index.html">Вернуться на главную</a>
+    </p>
+
+    <script>
+        let labels = document.getElementsByClassName("label");
+
+        for (let i = 0; i < labels.length; i++) {
+            labels[i].style.color = "red";
+        }
+
+        let inputs = document.getElementByClassName("input")
+
+        for (let i = 0; i < labels.length; i++) {
+            labels[i].style.color = "red";
+        } 
+        
+    </script>
+
+</body>
+
+</html>
