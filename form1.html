@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="utf-8">
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        .error-msg {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        .input-error {
+            border: 2px solid red !important;
+        }
+        .input-success {
+            border: 2px solid green !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="menu">
+        <a href="index.html">На главную</a>
+        <a href="form.html">Регистрация</a>
+    </nav>
+
+    <h1>Регистрация</h1>
+
+    <form id="registrationForm">
+
+        <p>
+            <label>
+                Имя:
+                <input type="text" name="name">
+            </label>
+        </p>
+
+        <p>
+            <label>
+                Email:
+                <input type="email" name="email">
+            </label>
+        </p>
+
+        <p>
+            <label>
+                Пароль:
+                <input type="password" name="password" id="passwordInput">
+            </label>
+            <span id="passwordError" class="error-msg"></span>
+        </p>
+
+        <p>
+            <label>
+                Изображение:
+                <input type="file" name="image">
+            </label>
+        </p>
+
+        <p>Пол:</p>
+        
+        <p>
+            <label>
+                <input type="radio" name="gender" value="male">
+                Мужской
+            </label>
+        </p>
+        
+        <p>
+            <label>
+                <input type="radio" name="gender" value="female">
+                Женский
+            </label>
+        </p>
+
+        <p>
+            <label>
+                <input type="checkbox" name="mailing">
+                Согласен на получение рассылки
+            </label>
+        </p>
+
+        <p>
+            <input type="submit" value="Зарегистрироваться">
+        </p>
+
+    </form>
+
+    <p>
+        <a href="index.html">Вернуться на главную</a>
+    </p>
+
+    <script>
+        const form = document.getElementById('registrationForm');
+        const passwordInput = document.getElementById('passwordInput');
+        const errorSpan = document.getElementById('passwordError');
+
+        form.addEventListener('submit', function(event) {
+            const password = passwordInput.value;
+            let isValid = true;
+            let errorText = "";
+
+            if (password.length < 8) {
+                isValid = false;
+                errorText = "Пароль должен содержать минимум 8 символов.";
+            } else if (!/[A-ZА-Я]/.test(password)) {
+                isValid = false;
+                errorText = "Пароль должен содержать хотя бы одну заглавную букву.";
+            } else if (!/[0-9]/.test(password)) {
+                isValid = false;
+                errorText = "Пароль должен содержать хотя бы одну цифру.";
+            } else if (!/[^a-zA-Zа-яА-Я0-9]/.test(password)) {
+                isValid = false;
+                errorText = "Пароль должен содержать хотя бы один спецсимвол (!@#$% и т.д.).";
+            }
+
+            if (!isValid) {
+                event.preventDefault();
+                errorSpan.textContent = errorText;
+                errorSpan.style.display = 'block';
+                passwordInput.classList.add('input-error');
+                passwordInput.classList.remove('input-success');
+            } else {
+                errorSpan.style.display = 'none';
+                passwordInput.classList.remove('input-error');
+                passwordInput.classList.add('input-success');
+            }
+        });
+    </script>
+
+</body>
+</html>
