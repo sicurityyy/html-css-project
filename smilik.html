@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Смайлик-Динозаврик: Таблица Лидеров</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f7f7f7;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+        }
+        .game-container {
+            position: relative;
+        }
+        canvas {
+            background-color: #ffffff;
+            border-bottom: 2px solid #535353;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: block;
+        }
+        /* Стили для оверлея (экрана Game Over) */
+        #overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: none; /* Скрыто по умолчанию */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        #overlay h2 {
+            color: #535353;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        #overlay p {
+            color: #535353;
+            font-size: 18px;
+            margin: 5px 0;
+        }
+        /* Стили для формы (из презентации) */
+        #saveScoreForm {
+            margin-top: 15px;
+            display: none; /* Скрыто, пока не введен рекорд */
+        }
+        #saveScoreForm input[type="text"] {
+            padding: 8px;
+            font-size: 16px;
+            font-family: 'Courier New', Courier, monospace;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            outline: none;
+        }
+        #saveScoreForm input[type="button"] {
+            padding: 8px 15px;
+            font-size: 16px;
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #535353;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+        #saveScoreForm input[type="button"]:hover {
+            background-color: #333;
+        }
+        #restartBtn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #535353;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #restartBtn:hover {
+            background-color: #333;
+        }
+        .leaderboard {
+            margin-top: 15px;
+            text-align: left;
+            font-size: 16px;
+            color: #535353;
+            background: #fff;
+            padding: 10px 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <canvas id="gameCanvas" width="800" height="300"></canvas>
+        
+        <!-- Экран окончания игры и таблица лидеров -->
+        <div id="overlay">
+            <h2>GAME OVER</h2>
+            <p>Ваш счет: <span id="finalScore">0</span></p>
+            
+            <!-- Форма для сохранения имени -->
+            <form id="saveScoreForm">
+                <input type="text" id="playerName" placeholder="Ваше имя" maxlength="10" required>
+                <input type="button" id="saveBtn" value="Сохранить">
+            </form>
+
+            <div class="leaderboard">
+                <b>🏆 Таблица лидеров:</b>
+                <ol id="leaderboardList"></ol>
+            </div>
+
+            <button id="restartBtn">Играть снова (Пробел)</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Элементы интерфейса
+        const overlay = document.getElementById('overlay');
+        const finalScoreText = document.getElementById('finalScore');
+        const saveScoreForm = document.getElementById('saveScoreForm');
+        const playerNameInput = document.getElementById('playerName');
+        const saveBtn = document.getElementById('saveBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const leaderboardList = document.getElementById('leaderboardList');
+
+        // Настройки игры
+        let isGameOver = false;
+        let score = 0;
+        let gameSpeed = 6;
+        let frameCount = 0;
+        let currentScore = 0; // Для сохранения в таблицу
+
+        // Данные игрока
+        const player = {
+            x: 50, y: 250, size: 35, vy: 0, gravity: 0.6, jumpForce: -13, isJumping: false
+        };
+
+        let obstacles = [];
+
+        // --- РАБОТА С ТАБЛИЦЕЙ ЛИДЕРОВ (localStorage) ---
+        function getLeaderboard() {
+            const saved = localStorage.getItem('smileyDinoLeaderboard');
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        function updateLeaderboardUI() {
+            const scores = getLeaderboard();
+            leaderboardList.innerHTML = ''; // Очищаем список
+            if (scores.length === 0) {
+                leaderboardList.innerHTML = '<li>Пока нет рекордов...</li>';
+            } else {
+                scores.forEach((item, index) => {
+                    const li = document.createElement('li');
+                    li.textContent = `${item.name}: ${item.score}`;
+                    // Выделяем топ-1
+                    if (index === 0) li.style.fontWeight = 'bold';
+                    leaderboardList.appendChild(li);
+                });
+            }
+        }
+
+        function saveScore(name) {
+            const scores = getLeaderboard();
+            scores.push({ name: name, score: currentScore });
+            // Сортируем по убыванию счета
+            scores.sort((a, b) => b.score - a.score);
+            // Оставляем только топ-5
+            const top5 = scores.slice(0, 5);
+            localStorage.setItem('smileyDinoLeaderboard', JSON.stringify(top5));
+            updateLeaderboardUI();
+        }
+
+        // --- УПРАВЛЕНИЕ ---
+        function jump() {
+            if (!player.isJumping && !isGameOver) {
+                player.vy = player.jumpForce;
+                player.isJumping = true;
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.code === 'ArrowUp') {
+                // Предотвращаем скролл страницы, только если игра идет
+                if (!isGameOver) e.preventDefault(); 
+                if (isGameOver) {
+                    restartGame();
+                } else {
+                    jump();
+                }
+            }
+        });
+
+        canvas.addEventListener('click', () => {
+            if (!isGameOver) jump();
+        });
+
+        // Обработка сохранения результата (используем кнопку, чтобы не было перезагрузки страницы)
+        saveBtn.addEventListener('click', () => {
+            const name = playerNameInput.value.trim();
+            if (name) {
+                saveScore(name);
+                saveScoreForm.style.display = 'none'; // Прячем форму
+            } else {
+                alert("Введите имя!");
+            }
+        });
+
+        restartBtn.addEventListener('click', restartGame);
+
+        // --- ЛОГИКА ИГРЫ ---
+        function spawnObstacle() {
+            if (frameCount % Math.floor(100 / (gameSpeed/5)) === 0) {
+                obstacles.push({ x: canvas.width, y: 250, size: 30, width: 20, height: 35 });
+            }
+        }
+
+        function update() {
+            if (isGameOver) return;
+            score++;
+            currentScore = Math.floor(score / 10);
+            frameCount++;
+
+            if (frameCount % 500 === 0) gameSpeed += 0.5;
+
+            player.y += player.vy;
+            player.vy += player.gravity;
+
+            if (player.y > 250) {
+                player.y = 250;
+                player.isJumping = false;
+            }
+
+            spawnObstacle();
+
+            for (let i = 0; i < obstacles.length; i++) {
+                obstacles[i].x -= gameSpeed;
+                if (obstacles[i].x + obstacles[i].width < 0) {
+                    obstacles.splice(i, 1);
+                    i--;
+                }
+            }
+            checkCollisions();
+        }
+
+        function checkCollisions() {
+            const playerBox = { x: player.x + 5, y: player.y - player.size + 5, w: player.size - 10, h: player.size - 10 };
+            for (let obs of obstacles) {
+                const obsBox = { x: obs.x + 5, y: obs.y - obs.size + 5, w: obs.width - 10, h: obs.height - 10 };
+                if (playerBox.x < obsBox.x + obsBox.w && playerBox.x + playerBox.w > obsBox.x &&
+                    playerBox.y < obsBox.y + obsBox.h && playerBox.y + playerBox.h > obsBox.y) {
+                    gameOver();
+                }
+            }
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            finalScoreText.innerText = currentScore;
+            
+            // Проверяем, побит ли рекорд (попадает ли в топ-5)
+            const scores = getLeaderboard();
+            if (scores.length < 5 || currentScore > scores[scores.length - 1].score) {
+                saveScoreForm.style.display = 'block'; // Показываем форму
+                playerNameInput.value = '';
+                playerNameInput.focus(); // Ставим курсор в поле ввода
+            } else {
+                saveScoreForm.style.display = 'none';
+            }
+            
+            updateLeaderboardUI();
+            overlay.style.display = 'flex'; // Показываем экран
+        }
+
+        // --- ОТРИСОВКА ---
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Земля
+            ctx.beginPath();
+            ctx.moveTo(0, 280);
+            ctx.lineTo(canvas.width, 280);
+            ctx.strokeStyle = "#ccc";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Смайлик
+            ctx.font = "40px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "bottom";
+            ctx.fillText("😃", player.x + player.size/2, player.y + 5);
+
+            // Кактусы
+            for (let obs of obstacles) {
+                ctx.font = "35px Arial";
+                ctx.fillText("🌵", obs.x + obs.width/2, obs.y + 5);
+            }
+
+            // Счет в углу
+            ctx.font = "20px 'Courier New'";
+            ctx.fillStyle = "#535353";
+            ctx.textAlign = "right";
+            ctx.fillText("СЧЕТ: " + currentScore, canvas.width - 20, 40);
+        }
+
+        function restartGame() {
+            isGameOver = false;
+            score = 0;
+            currentScore = 0;
+            gameSpeed = 6;
+            frameCount = 0;
+            obstacles = [];
+            player.y = 250;
+            player.vy = 0;
+            player.isJumping = false;
+            
+            overlay.style.display = 'none'; // Прячем экран Game Over
+            saveScoreForm.style.display = 'none';
+            
+            gameLoop();
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            if (!isGameOver) {
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        // Инициализация при запуске
+        updateLeaderboardUI();
+        gameLoop();
+
+    </script>
+</body>
+</html>
