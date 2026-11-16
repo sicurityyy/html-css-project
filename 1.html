@@ -13,3 +13,108 @@ CLEAR(document.getElementById("elem"));
 </BODY>
 </HTML>
     
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог магазина</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .products-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .product-card {
+            width: 250px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-card h2 {
+            color: #333;
+        }
+
+        .price {
+            color: green;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Каталог магазина</h1>
+
+    <div class="products-container" id="products">
+        Загрузка товаров...
+    </div>
+
+    <script>
+        async function getProducts() {
+            const container = document.getElementById("products");
+
+            try {
+                const response = await fetch(
+                    "http://localhost:10800/api/products"
+                );
+
+                if (!response.ok) {
+                    throw new Error("Ошибка получения товаров");
+                }
+
+                const products = await response.json();
+
+                container.innerHTML = "";
+
+                // Перебираем все товары
+                products.forEach(product => {
+
+                    const card = document.createElement("div");
+                    card.className = "product-card";
+
+                    card.innerHTML = `
+                        <h2>${product.name}</h2>
+
+                        <p>${product.description || "Описание отсутствует"}</p>
+
+                        <p class="price">${product.price} ₽</p>
+
+                        <p>Категория: ${
+                            product.category?.name || "Без категории"
+                        }</p>
+                    `;
+
+                    // Добавляем карточку в Flex-контейнер
+                    container.appendChild(card);
+                });
+
+            } catch (error) {
+                container.innerHTML = "Ошибка: " + error.message;
+                console.error(error);
+            }
+        }
+
+        // Запускаем получение товаров
+        getProducts();
+    </script>
+
+</body>
+</html>
