@@ -118,3 +118,189 @@ CLEAR(document.getElementById("elem"));
 
 </body>
 </html>
+
+
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Интернет-магазин</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        /* Flex-контейнер */
+        .products-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        /* Карточка товара */
+        .product-card {
+            width: 250px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Фотография товара */
+        .product-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: contain;
+            margin-bottom: 15px;
+        }
+
+        .product-card h2 {
+            font-size: 20px;
+            color: #333;
+        }
+
+        .product-card p {
+            color: #666;
+        }
+
+        .price {
+            color: green !important;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 20px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <h1>Каталог интернет-магазина</h1>
+
+    <!-- Flex-контейнер -->
+    <div class="products-container" id="products">
+        <p class="loading">Загрузка товаров...</p>
+    </div>
+
+
+    <script>
+
+        // Функция получения товаров
+        async function getProducts() {
+
+            const container = document.getElementById("products");
+
+            try {
+
+                // GET-запрос к Java API
+                const response = await fetch(
+                    "http://localhost:10800/api/products"
+                );
+
+                if (!response.ok) {
+                    throw new Error("Ошибка получения товаров");
+                }
+
+                // Получаем данные в формате JSON
+                const products = await response.json();
+
+                // Очищаем контейнер
+                container.innerHTML = "";
+
+                // Перебираем все товары
+                products.forEach(product => {
+
+                    // Создаём карточку товара
+                    const card = document.createElement("div");
+
+                    card.className = "product-card";
+
+                    // Находим главное изображение
+                    const mainImage = product.images?.find(
+                        image => image.main
+                    ) || product.images?.[0];
+
+                    // Получаем ссылку на изображение
+                    const imageUrl = mainImage
+                        ? mainImage.imageUrl
+                        : "";
+
+                    // Заполняем карточку информацией
+                    card.innerHTML = `
+
+                        <img src="${imageUrl}"
+                             alt="${product.name}"
+                             onerror="this.style.display='none'">
+
+                        <h2>${product.name}</h2>
+
+                        <p>
+                            ${product.description || "Описание отсутствует"}
+                        </p>
+
+                        <p class="price">
+                            ${product.price} ₽
+                        </p>
+
+                        <p>
+                            Категория:
+                            ${product.category?.name || "Без категории"}
+                        </p>
+
+                    `;
+
+                    // Добавляем карточку в Flex-контейнер
+                    container.appendChild(card);
+
+                });
+
+                if (products.length === 0) {
+                    container.innerHTML = "<p>Товары не найдены</p>";
+                }
+
+            } catch (error) {
+
+                container.innerHTML =
+                    "<p>Не удалось загрузить товары. Проверь Java API.</p>";
+
+                console.error(error);
+
+            }
+
+        }
+
+        // Запускаем функцию
+        getProducts();
+
+    </script>
+
+</body>
+
+</html>
